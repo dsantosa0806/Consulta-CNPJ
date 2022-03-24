@@ -21,7 +21,32 @@ table = pd.read_excel('dados.xlsx')
 for i, cnpj in enumerate(table['CNPJ1']):
     cnpj = {'cnpj': "%014d" % cnpj}
     resultado = get_cnpj_data(cnpj)
-    print(i,cnpj,' - ', resultado['razao_social'],' _ ',resultado['descricao_situacao_cadastral'],' Status Matriz/Filial * ', resultado['identificador_matriz_filial'])
+    razaoSociao = resultado['razao_social']
+    situacaoCadastral = resultado['descricao_situacao_cadastral']
+    indicadorMatrizFilial = resultado['identificador_matriz_filial']
+    situacaoCadastralMotivo = resultado['descricao_motivo_situacao_cadastral']
+    enteFederado = resultado['ente_federativo_responsavel']
+
+## Tratamento de Matriz / Filial
+    if indicadorMatrizFilial == 1:
+        indicadorMatrizFilial = 'Matriz'
+    else:
+        indicadorMatrizFilial = 'Filial'
+## Tratamento de Situação cadastral sem motivo
+    if situacaoCadastralMotivo == 'SEM MOTIVO':
+        situacaoCadastralMotivo = ''
+    else:
+        situacaoCadastralMotivo
+
+## Tratamento de Ente federado
+
+    if enteFederado != '':
+        enteFederado = 'PJ de direito Público'
+    else:
+        enteFederado = 'Pj de direito Privado'
+        
+
+    print(f'''{i},{cnpj} -  {razaoSociao} _ {situacaoCadastral} * {indicadorMatrizFilial} - {situacaoCadastralMotivo} ({enteFederado})''')
 
 print('consulta finalizada ! ')
 
