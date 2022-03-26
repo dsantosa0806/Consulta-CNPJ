@@ -37,8 +37,7 @@ def exporta_dados():
     # print(usuarios_cadastrados)
     data = (datetime.today().strftime('%Y-%m-%d %H_%M'))
     dados=pd.DataFrame(dados, columns=['cnpj','TipoCnpj','StatusMatrizFilial','Situacao','SituacaoMotivo','Nome','id'])
-    print(dados)
-    dados.to_excel(f'''dados_finalizados_{data}.xlsx''')
+    dados.to_excel(f'''dados_finalizados_{data}.xlsx''',sheet_name='Resultado',index=False)
 
     # Commit as mudanças:
     conexao.commit()
