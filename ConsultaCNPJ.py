@@ -1,8 +1,6 @@
 import json
 import requests
 import pandas as pd
-import time
-
 
 def get_cnpj_data(cnpj):
 
@@ -16,8 +14,10 @@ def get_cnpj_data(cnpj):
     else:
         print('Falha na consulta !')
 
-
+## Instanciando a Tabela
+## Os Cnpj's da tabela precisam estar sem formatação
 table = pd.read_excel('dados.xlsx')
+
 for i, cnpj in enumerate(table['CNPJ1']):
     cnpj = {'cnpj': "%014d" % cnpj}
     resultado = get_cnpj_data(cnpj)
@@ -26,27 +26,26 @@ for i, cnpj in enumerate(table['CNPJ1']):
     indicadorMatrizFilial = resultado['identificador_matriz_filial']
     situacaoCadastralMotivo = resultado['descricao_motivo_situacao_cadastral']
     enteFederado = resultado['ente_federativo_responsavel']
+    numeroCnpj = resultado['cnpj']
+    numeroCnpjFormatado = '{}.{}.{}/{}-{}'.format(numeroCnpj[:2], numeroCnpj[2:5], numeroCnpj[5:8], numeroCnpj[8:12], numeroCnpj[12:])
 
 ## Tratamento de Matriz / Filial
     if indicadorMatrizFilial == 1:
-        indicadorMatrizFilial = 'Matriz'
+        indicadorMatrizFilial = 'MATRIZ'
     else:
-        indicadorMatrizFilial = 'Filial'
+        indicadorMatrizFilial = 'FILIAL'
 ## Tratamento de Situação cadastral sem motivo
     if situacaoCadastralMotivo == 'SEM MOTIVO':
         situacaoCadastralMotivo = ''
     else:
         situacaoCadastralMotivo
-
 ## Tratamento de Ente federado
-
     if enteFederado != '':
-        enteFederado = 'PJ de direito Público'
+        enteFederado = 'PJ PÚBLICO'
     else:
-        enteFederado = 'Pj de direito Privado'
-        
+        enteFederado = 'PJ PRIVADO'        
 
-    print(f'''{i},{cnpj} -  {razaoSociao} _ {situacaoCadastral} * {indicadorMatrizFilial} - {situacaoCadastralMotivo} ({enteFederado})''')
+    print(f'''{numeroCnpjFormatado} - ({enteFederado}) - {indicadorMatrizFilial} - {situacaoCadastral} - {situacaoCadastralMotivo} - {razaoSociao} ''')
 
 print('consulta finalizada ! ')
 
