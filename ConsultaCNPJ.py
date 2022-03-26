@@ -9,7 +9,7 @@ def cadastrar_demanda():
     conexao = sqlite3.connect('Bd_teste.db')
     c = conexao.cursor()
 
-    #Inserir dados na tabela:
+    #Inserir dados na tabela do BD:
     c.execute("INSERT INTO Cnpjs_Consultados VALUES (:cnpj,:TipoCnpj,:StatusMatrizFilial,:Situacao,:SituacaoMotivo,:Nome)",
               {
                   'cnpj': numeroCnpjFormatado,
