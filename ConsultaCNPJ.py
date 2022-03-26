@@ -1,6 +1,50 @@
+from datetime import datetime 
 import json
 import requests
 import pandas as pd
+import sqlite3
+
+
+def cadastrar_demanda():
+    conexao = sqlite3.connect('Bd_teste.db')
+    c = conexao.cursor()
+
+    #Inserir dados na tabela:
+    c.execute("INSERT INTO Cnpjs_Consultados VALUES (:cnpj,:TipoCnpj,:StatusMatrizFilial,:Situacao,:SituacaoMotivo,:Nome)",
+              {
+                  'cnpj': numeroCnpjFormatado,
+                  'TipoCnpj': enteFederado,
+                  'StatusMatrizFilial': matrizFilial,
+                  'Situacao': situacaoCadastral,
+                  'SituacaoMotivo': situacaoCadastralMotivo,
+                  'Nome': razaoSociao
+              })
+
+
+    # Commit as mudanças:
+    conexao.commit()
+
+    # Fechar o banco de dados:
+    conexao.close()
+
+def exporta_dados():
+    conexao = sqlite3.connect('Bd_teste.db')
+    c = conexao.cursor()
+
+    # Inserir dados na tabela:
+    c.execute("SELECT *, oid FROM Cnpjs_Consultados")
+    dados = c.fetchall()
+    # print(usuarios_cadastrados)
+    data = (datetime.today().strftime('%Y-%m-%d %H_%M'))
+    dados=pd.DataFrame(dados, columns=['cnpj','TipoCnpj','StatusMatrizFilial','Situacao','SituacaoMotivo','Nome','id'])
+    print(dados)
+    dados.to_excel(f'''dados_finalizados_{data}.xlsx''')
+
+    # Commit as mudanças:
+    conexao.commit()
+
+    # Fechar o banco de dados:
+    conexao.close()
 
 def formata_cnpj(numeroCnpj):
     
@@ -58,6 +102,10 @@ for i, cnpj in enumerate(table['CNPJ1']):
     numeroCnpjFormatado = formata_cnpj(resultado['cnpj'])    
        
     print(f'''{numeroCnpjFormatado} - {enteFederado} - {matrizFilial} - {situacaoCadastral} - {situacaoCadastralMotivo} - {razaoSociao} ''')
+    cadastrar_demanda()
 
-print('consulta finalizada ! ')
+
+print('Cadastro Finalizado ! ')
+exporta_dados()
+print ('Planilha Gerada com sucesso !')
 
