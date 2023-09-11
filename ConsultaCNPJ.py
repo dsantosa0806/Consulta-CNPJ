@@ -20,12 +20,12 @@ def cadastrar_demanda():
                   'Nome': razaoSociao
               })
 
-
     # Commit as mudanças:
     conexao.commit()
 
     # Fechar o banco de dados:
     conexao.close()
+
 
 def exporta_dados():
     conexao = sqlite3.connect('Bd_teste.db')
@@ -36,7 +36,7 @@ def exporta_dados():
     dados = c.fetchall()
     # print(usuarios_cadastrados)
     data = (datetime.today().strftime('%Y-%m-%d %H_%M'))
-    dados=pd.DataFrame(dados, columns=['cnpj','TipoCnpj','StatusMatrizFilial','Situacao','SituacaoMotivo','Nome','id'])
+    dados = pd.DataFrame(dados, columns=['cnpj','TipoCnpj','StatusMatrizFilial','Situacao','SituacaoMotivo','Nome','id'])
     dados.to_excel(f'''dados_finalizados_{data}.xlsx''',sheet_name='Resultado',index=False)
 
     # Commit as mudanças:
@@ -45,12 +45,14 @@ def exporta_dados():
     # Fechar o banco de dados:
     conexao.close()
 
+
 def formata_cnpj(numeroCnpj):
     
     # Formata o Cnpj com pontos e barras
     cnpj = '{}.{}.{}/{}-{}'.format(numeroCnpj[:2], numeroCnpj[2:5], numeroCnpj[5:8], numeroCnpj[8:12], numeroCnpj[12:])
 
     return cnpj
+
 
 def tratamento_Matriz_Filial(indicadorMatrizFilial):
     ## Tratamento de Matriz / Filial
@@ -59,12 +61,14 @@ def tratamento_Matriz_Filial(indicadorMatrizFilial):
     else:
         return 'FILIAL'
 
+
 def tratamento_Situacao_Cadastral_Motivo(situacaoCadastralMotivo):
     ## Tratamento de Situação cadastral sem motivo
     if situacaoCadastralMotivo == 'SEM MOTIVO':
         return ''
     else:
         return situacaoCadastralMotivo
+
 
 def tratamento_Ente_Federado(enteFederado):
 
@@ -74,17 +78,23 @@ def tratamento_Ente_Federado(enteFederado):
     else:
         return 'PJ PRIVADO'   
 
+
 def get_cnpj_data(cnpj):
+    url = f'https://minhareceita.org/{cnpj}'  # Substitua pela URL da API desejada
 
-    # Dado um CNPJ, faz uma requisição para a API Minha Receita. Caso a requisição seja bem sucedida, retorna o conteúdo da requisição em formato json
-    minha_receita_api_url = 'https://minhareceita.org/'
-    requisicao = requests.post(minha_receita_api_url, data=cnpj, timeout=None)
-    if requisicao.status_code == 200:
+    # Realiza a requisição GET à API
+    response = requests.get(url)
 
-        return json.loads(requisicao.content)
-
+    # Verifica o código de status da resposta
+    if response.status_code == 200:
+        # Requisição bem-sucedida
+        data = response.json()
+        return data
     else:
-        print('Falha na consulta !')
+        # Erro na requisição
+        print(f'Erro {response.status_code}: {response.text}')
+        return None
+
 
 ## Instanciando a Tabela
 ## Os Cnpj's da tabela precisam estar sem formatação
@@ -93,6 +103,7 @@ table = pd.read_excel('dados.xlsx')
 for i, cnpj in enumerate(table['CNPJ1']):
     cnpj = {'cnpj': "%014d" % cnpj}
     resultado = get_cnpj_data(cnpj)
+
     razaoSociao = resultado['razao_social']
     situacaoCadastral = resultado['descricao_situacao_cadastral']
     matrizFilial = tratamento_Matriz_Filial(resultado['identificador_matriz_filial'])
@@ -105,6 +116,3 @@ for i, cnpj in enumerate(table['CNPJ1']):
 
 
 print('Cadastro Finalizado ! ')
-exporta_dados()
-print ('Planilha Gerada com sucesso !')
-
